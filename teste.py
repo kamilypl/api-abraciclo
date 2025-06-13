@@ -8,12 +8,11 @@ app = Flask(__name__)
 @app.route('/extrair-tabelas', methods=['POST'])
 def extrair_tabelas():
     file = request.files['file']
+    # O segredo aqui: trabalhar com BytesIO
     CABECALHO_PADRAO = ["MODELOS", "cm³", "JAN", "FEV", "MAR", "ABR", "TOTAL", "%"]
     todas_as_tabelas = []
     with pdfplumber.open(BytesIO(file.read())) as pdf:
-        # Pega só as páginas de 30 a 42 (índices 29 a 41)
-        for i in range(29, 42):  # 42 não entra, python style!
-            pagina = pdf.pages[i]
+        for pagina in pdf.pages:
             tabelas = pagina.extract_tables()
             for tabela in tabelas:
                 if tabela and len(tabela) > 1 and len(tabela[0]) == 8:
@@ -21,11 +20,12 @@ def extrair_tabelas():
                     todas_as_tabelas.append(df)
     if todas_as_tabelas:
         df_final = pd.concat(todas_as_tabelas, ignore_index=True)
+        # Agora vamos devolver o Excel direto como resposta, sem salvar no disco!
         output = BytesIO()
         df_final.to_excel(output, index=False)
         output.seek(0)
         return (
-            output.getvalue(),
+            output.getvalue(),  # Binário do arquivo
             200,
             {
                 "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
