@@ -3,7 +3,6 @@ pdfplumber
 pandas
 openpyxl
 gunicorn
-io
-re
+
 
 
