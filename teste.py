@@ -9,13 +9,13 @@ app = Flask(__name__)
 def extrair_tabelas():
     file = request.files['file']
     # O segredo aqui: trabalhar com BytesIO
-    CABECALHO_PADRAO = ["MODELOS", "cm³", "JAN", "FEV", "MAR", "ABR", "TOTAL", "%"]
+    CABECALHO_PADRAO = ["MODELOS", "cm³", "JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "SET","OUT", "NOV", "DEZ", "TOTAL", "%"]
     todas_as_tabelas = []
     with pdfplumber.open(BytesIO(file.read())) as pdf:
         for pagina in pdf.pages:
             tabelas = pagina.extract_tables()
             for tabela in tabelas:
-                if tabela and len(tabela) > 1 and len(tabela[0]) == 8:
+                if tabela and len(tabela) > 1 and len(tabela[0]) == 16:
                     df = pd.DataFrame(tabela[1:], columns=CABECALHO_PADRAO)
                     todas_as_tabelas.append(df)
     if todas_as_tabelas:
